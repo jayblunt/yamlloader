@@ -448,6 +448,6 @@ def fixStationNames(connection,metadata):
     invNames =  Table('invNames', metadata)
     staStations = Table('staStations',metadata)
     
-    connection.execute(staStations.update().values(stationName=select([invNames.c.itemName]).where(staStations.c.stationID==invNames.c.itemID)))
+    connection.execute(staStations.update().values(stationName=select([invNames.c.itemName]).where(staStations.c.stationID==invNames.c.itemID).as_scalar()))
 
 
