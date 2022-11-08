@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 import os
 import glob
@@ -22,21 +21,21 @@ def importyaml(connection,metadata,sourcePath):
         tablename=tail.split('.')[0]
 
         if tablename[:3] == 'dgm':
-            print("Skipping {}".format(tablename))
+            print(f"Skipping {tablename}")
             continue
 
         print(tablename)
         tablevar = sqlalchemy.Table(tablename,metadata)
-        print("Importing {}".format(file))
+        print(f"Importing {file}")
         trans = connection.begin()
-        with open(file,'r') as yamlstream:
-            print("importing {}".format(os.path.basename(yamlstream.name)))
+        with open(file) as yamlstream:
+            print(f"importing {os.path.basename(yamlstream.name)}")
             rows=load(yamlstream,Loader=SafeLoader)
-            print("{} loaded".format(os.path.basename(yamlstream.name)))
+            print(f"{os.path.basename(yamlstream.name)} loaded")
             if rows is not None:
                 for row in rows:
                     try:
                         connection.execute(tablevar.insert().values(row))
                     except sqlalchemy.exc.IntegrityError as err:
-                        print("{} skipped {} ({})".format(tablename, row, err))
+                        print(f"{tablename} skipped {row} ({err})")
         trans.commit()

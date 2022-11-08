@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 import os
 #sys.setdefaultencoding("utf-8")
@@ -17,10 +16,10 @@ def importyaml(connection,metadata,sourcePath,language='en'):
     chrBloodlines = Table('chrBloodlines',metadata)
     
     trans = connection.begin()
-    with open(os.path.join(sourcePath,'fsd','bloodlines.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','bloodlines.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         bloodlines=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for bloodlineid in bloodlines:
             connection.execute(chrBloodlines.insert(),
                             bloodlineID=bloodlineid,

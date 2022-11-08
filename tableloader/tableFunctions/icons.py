@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from yaml import load, dump
 try:
 	from yaml import CSafeLoader as SafeLoader
@@ -13,11 +12,11 @@ from sqlalchemy import Table
 def importyaml(connection,metadata,sourcePath):
     eveIcons = Table('eveIcons',metadata)
     print("Importing Icons")
-    with open(os.path.join(sourcePath,'fsd','iconIDs.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','iconIDs.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         trans = connection.begin()
         icons=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for icon in icons:
             connection.execute(eveIcons.insert(),
                             iconID=icon,

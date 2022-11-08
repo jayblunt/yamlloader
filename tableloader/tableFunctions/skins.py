@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from yaml import load, dump
 try:
 	from yaml import CSafeLoader as SafeLoader
@@ -19,10 +18,10 @@ def importyaml(connection,metadata,sourcePath):
     trans = connection.begin()
     print("Importing Skins")
     print("opening Yaml1")
-    with open(os.path.join(sourcePath,'fsd','skins.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','skins.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         skins=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for skinid in skins:
             connection.execute(skins_table.insert(),
                             skinID=skinid,
@@ -35,20 +34,20 @@ def importyaml(connection,metadata,sourcePath):
 
 
     print("opening Yaml2")
-    with open(os.path.join(sourcePath,'fsd','skinLicenses.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','skinLicenses.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         skinlicenses=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for licenseid in skinlicenses:
             connection.execute(skinLicense.insert(),
                                 licenseTypeID=licenseid,
                                 duration=skinlicenses[licenseid]['duration'],
                                 skinID=skinlicenses[licenseid]['skinID'])
     print("opening Yaml3")
-    with open(os.path.join(sourcePath,'fsd','skinMaterials.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','skinMaterials.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         skinmaterials=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for materialid in skinmaterials:
             connection.execute(skinMaterials.insert(),
                                 skinMaterialID=materialid,

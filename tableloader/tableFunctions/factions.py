@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 #sys.setdefaultencoding("utf-8")
 from sqlalchemy import Table
@@ -16,10 +15,10 @@ def importyaml(connection,metadata,sourcePath,language='en'):
     chrFactions = Table('chrFactions',metadata)
     
     trans = connection.begin()
-    with open(os.path.join(sourcePath,'fsd','factions.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','factions.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         characterfactions=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for factionid in characterfactions:
             connection.execute(chrFactions.insert(),
                             factionID=factionid,

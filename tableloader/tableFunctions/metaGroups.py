@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 import os
 from sqlalchemy import Table
@@ -17,10 +16,10 @@ def importyaml(connection,metadata,sourcePath,language='en'):
     trnTranslations = Table('trnTranslations',metadata)
     
     trans = connection.begin()
-    with open(os.path.join(sourcePath,'fsd','metaGroups.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','metaGroups.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         metagroups=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for metagroupid in metagroups:
             connection.execute(invMetaGroups.insert(),
                             metaGroupID=metagroupid,
@@ -34,11 +33,11 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                     try:
                         connection.execute(trnTranslations.insert(),tcID=34,keyID=metagroupid,languageID=lang,text=metagroups[metagroupid]['nameID'][lang])
                     except:                        
-                        print('{} {} has a category problem'.format(categoryid,lang))
+                        print(f'{categoryid} {lang} has a category problem')
             if 'descriptionID' in metagroups[metagroupid]:
                 for lang in metagroups[metagroupid]['descriptionID']:
                     try:
                         connection.execute(trnTranslations.insert(),tcID=35,keyID=metagroupid,languageID=lang,text=metagroups[metagroupid]['descriptionID'][lang])
                     except:                        
-                        print('{} {} has a category problem'.format(categoryid,lang))
+                        print(f'{categoryid} {lang} has a category problem')
     trans.commit()

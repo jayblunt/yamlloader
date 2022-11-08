@@ -157,7 +157,7 @@ while page <= maxpage:
     groupjson = groups.json()
     maintypelist = maintypelist + groupjson
 
-print("Page variable is {}".format(page))
+print(f"Page variable is {page}")
 
 firstbadlist = getitems(maintypelist)
 print("Getting badlist")

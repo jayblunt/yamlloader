@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from yaml import load, dump
 try:
 	from yaml import CSafeLoader as SafeLoader
@@ -14,11 +13,11 @@ def importyaml(connection,metadata,sourcePath,language='en'):
     invGroups = Table('invGroups',metadata)
     trnTranslations = Table('trnTranslations',metadata)
     print("Importing Groups")
-    with open(os.path.join(sourcePath,'fsd','groupIDs.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','groupIDs.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         trans = connection.begin()
         groupids=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for groupid in groupids:
             connection.execute(invGroups.insert(),
                             groupID=groupid,

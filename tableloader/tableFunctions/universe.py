@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 from yaml import load, dump
 try:
@@ -24,7 +23,7 @@ def grouplookup(connection,metadata,typeid):
                 invTypes.select().where( invTypes.c.typeID == typeid )
             ).fetchall()[0]['groupID']
     except:
-        print("Group lookup failed on typeid {}".format(typeid))
+        print(f"Group lookup failed on typeid {typeid}")
         groupid=-1
     typeidcache[typeid]=groupid
     return groupid
@@ -77,9 +76,9 @@ def importyaml(connection,metadata,sourcePath):
     regions=glob.glob(os.path.join(sourcePath,'fsd','universe','*','*','region.staticdata'))
     for regionfile in regions:
         head, tail = os.path.split(regionfile)
-        print("Importing Region {}".format(head))
+        print(f"Importing Region {head}")
         trans = connection.begin()
-        with open(regionfile,'r') as yamlstream:
+        with open(regionfile) as yamlstream:
             region=load(yamlstream,Loader=SafeLoader)
         try:
             regionname=connection.execute(
@@ -87,7 +86,7 @@ def importyaml(connection,metadata,sourcePath):
             ).fetchall()[0]['itemName']
         except:
             regionname="No Name"
-        print("Region {}".format(regionname))
+        print(f"Region {regionname}")
         connection.execute(mapRegions.insert(),
                             regionID=region['regionID'],
                             regionName=regionname,
@@ -124,7 +123,7 @@ def importyaml(connection,metadata,sourcePath):
         constellations=glob.glob(os.path.join(head,'*','constellation.staticdata'))
         for constellationfile in constellations:
             chead, tail = os.path.split(constellationfile)
-            with open(constellationfile,'r') as yamlstream:
+            with open(constellationfile) as yamlstream:
                 constellation=load(yamlstream,Loader=SafeLoader)
             try:
                 constellationname=connection.execute(
@@ -132,7 +131,7 @@ def importyaml(connection,metadata,sourcePath):
                 ).fetchall()[0]['itemName']
             except:
                 constellationname="No Constellation name"
-            print("Constellation {}".format(constellationname))
+            print(f"Constellation {constellationname}")
             connection.execute(mapConstellations.insert(),
                                 regionID=region['regionID'],
                                 constellationID=constellation['constellationID'],
@@ -167,7 +166,7 @@ def importyaml(connection,metadata,sourcePath):
             systems=glob.glob(os.path.join(chead,'*','solarsystem.staticdata'))
             print("Importing Systems")
             for systemfile in systems:
-                with open(systemfile,'r') as yamlstream:
+                with open(systemfile) as yamlstream:
                     system=load(yamlstream,Loader=SafeLoader)
                 try:
                     systemname=connection.execute(
@@ -175,7 +174,7 @@ def importyaml(connection,metadata,sourcePath):
                     ).fetchall()[0]['itemName']
                 except:
                     systemname="No System Name"
-                print("System {}".format(systemname))
+                print(f"System {systemname}")
                 if 'star' in system:
                     starname=connection.execute(
                         invNames.select().where( invNames.c.itemID == system['star']['id'] )

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from yaml import load, dump
 try:
 	from yaml import CSafeLoader as SafeLoader
@@ -16,11 +15,11 @@ def importyaml(connection,metadata,sourcePath,language='en'):
     agtAgentsInSpace = Table('agtAgentsInSpace',metadata)
     agtResearchAgents = Table ('agtResearchAgents',metadata)
     print("Importing Agents")
-    with open(os.path.join(sourcePath,'fsd','agents.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','agents.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         trans = connection.begin()
         agents=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for agentid in agents:
             connection.execute(agtAgents.insert(),
                             agentID=agentid,
@@ -33,11 +32,11 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                               )
     trans.commit()
     print("Importing AgentsInSpace")
-    with open(os.path.join(sourcePath,'fsd','agentsInSpace.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','agentsInSpace.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         trans = connection.begin()
         agents=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for agentid in agents:
             connection.execute(agtAgentsInSpace.insert(),
                             agentID=agentid,
@@ -48,11 +47,11 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                               )
     trans.commit()
     print("Importing research agents")
-    with open(os.path.join(sourcePath,'fsd','researchAgents.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','researchAgents.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         trans = connection.begin()
         agents=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for agentid in agents:
             for skill in agents[agentid]['skills']:
                 connection.execute(agtResearchAgents.insert(),

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from yaml import load
 try:
 	from yaml import CSafeLoader as SafeLoader
@@ -23,10 +22,10 @@ def importyaml(connection,metadata,sourcePath):
 
     print("importing Blueprints")
     trans = connection.begin()
-    with open(os.path.join(sourcePath,'fsd','blueprints.yaml'),'r') as yamlstream:
-        print("importing {}".format(os.path.basename(yamlstream.name)))
+    with open(os.path.join(sourcePath,'fsd','blueprints.yaml')) as yamlstream:
+        print(f"importing {os.path.basename(yamlstream.name)}")
         blueprints=load(yamlstream,Loader=SafeLoader)
-        print("{} loaded".format(os.path.basename(yamlstream.name)))
+        print(f"{os.path.basename(yamlstream.name)} loaded")
         for blueprint in blueprints:
             connection.execute(industryBlueprints.insert(),typeID=blueprint,maxProductionLimit=blueprints[blueprint]["maxProductionLimit"])
             for activity in blueprints[blueprint]['activities']:
@@ -63,5 +62,5 @@ def importyaml(connection,metadata,sourcePath):
                                                 skillID=skill['typeID'],
                                                 level=skill['level'])
                 except:
-                    print('{} has a bad skill'.format(blueprint))
+                    print(f'{blueprint} has a bad skill')
     trans.commit()
