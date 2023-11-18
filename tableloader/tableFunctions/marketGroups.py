@@ -21,25 +21,25 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         marketgroups=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for marketgroupid in marketgroups:
-            connection.execute(invMarketGroups.insert(),
+            connection.execute(invMarketGroups.insert().values(
                             marketGroupID=marketgroupid,
                             parentGroupID=marketgroups[marketgroupid].get('parentGroupID',None),
                             marketGroupName=marketgroups[marketgroupid].get('nameID',{}).get(language,''),
                             description=marketgroups[marketgroupid].get('descriptionID',{}).get(language,''),
                             iconID=marketgroups[marketgroupid].get('iconID'),
                             hasTypes=marketgroups[marketgroupid].get('hasTypes',False)
-            )
+            ))
             
             if 'nameID' in marketgroups[marketgroupid]:
                 for lang in marketgroups[marketgroupid]['nameID']:
                     try:
-                        connection.execute(trnTranslations.insert(),tcID=36,keyID=marketgroupid,languageID=lang,text=marketgroups[marketgroupid]['nameID'][lang])
+                        connection.execute(trnTranslations.insert().values(tcID=36,keyID=marketgroupid,languageID=lang,text=marketgroups[marketgroupid]['nameID'][lang]))
                     except:                        
-                        print(f'{categoryid} {lang} has a category problem')
+                        print(f'{marketgroupid} {lang} has a category problem')
             if 'descriptionID' in marketgroups[marketgroupid]:
                 for lang in marketgroups[marketgroupid]['descriptionID']:
                     try:
-                        connection.execute(trnTranslations.insert(),tcID=37,keyID=marketgroupid,languageID=lang,text=marketgroups[marketgroupid]['descriptionID'][lang])
+                        connection.execute(trnTranslations.insert().values(tcID=37,keyID=marketgroupid,languageID=lang,text=marketgroups[marketgroupid]['descriptionID'][lang]))
                     except:                        
-                        print(f'{categoryid} {lang} has a category problem')
+                        print(f'{marketgroupid} {lang} has a category problem')
     trans.commit()

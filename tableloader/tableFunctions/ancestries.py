@@ -21,7 +21,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         characterancestries=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for ancestryid in characterancestries:
-            connection.execute(chrAncestries.insert(),
+            connection.execute(chrAncestries.insert().values(
                             ancestryID=ancestryid,
                             ancestryName=characterancestries[ancestryid].get('nameID',{}).get(language,''),
                             description=characterancestries[ancestryid].get('descriptionID',{}).get(language,''),
@@ -31,6 +31,6 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                             intelligence=characterancestries[ancestryid].get('intelligence'),
                             memory=characterancestries[ancestryid].get('memory'),
                             perception=characterancestries[ancestryid].get('perception'),
-                            shortDescription=characterancestries[ancestryid].get('shortDescription'),
-                              ) 
+                            shortDescription=characterancestries[ancestryid].get('shortDescription')
+            ))
     trans.commit()

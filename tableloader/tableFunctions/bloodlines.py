@@ -21,7 +21,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         bloodlines=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for bloodlineid in bloodlines:
-            connection.execute(chrBloodlines.insert(),
+            connection.execute(chrBloodlines.insert().values(
                             bloodlineID=bloodlineid,
                             bloodlineName=bloodlines[bloodlineid].get('nameID',{}).get(language,''),
                             description=bloodlines[bloodlineid].get('descriptionID',{}).get(language,''),
@@ -33,5 +33,5 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                             perception=bloodlines[bloodlineid].get('perception'),
                             raceID=bloodlines[bloodlineid].get('raceID'),
                             shipTypeID=bloodlines[bloodlineid].get('shipTypeID'),
-                            ) 
+            ))
     trans.commit()

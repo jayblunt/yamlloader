@@ -22,7 +22,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for dogmaAttributeID in dogmaAttributes:
           attribute = dogmaAttributes[dogmaAttributeID]
-          connection.execute(dgmAttributes.insert(),
+          connection.execute(dgmAttributes.insert().values(
                                attributeID=dogmaAttributeID,
                                categoryID=attribute.get('categoryID'),
                                defaultValue=attribute.get('defaultValue'),
@@ -34,5 +34,5 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                                stackable=attribute.get('stackable'),
                                highIsGood=attribute.get('highIsGood'),
                                displayName=attribute.get('displayNameID',{}).get(language)
-                )
+                ))
     trans.commit()

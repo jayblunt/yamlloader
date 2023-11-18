@@ -22,7 +22,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         npccorps=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for corpid in npccorps:
-            connection.execute(crpNPCCorporations.insert(),
+            connection.execute(crpNPCCorporations.insert().values(
                             corporationID=corpid,
                             description=npccorps[corpid].get('descriptionID',{}).get(language,''),
                             iconID=npccorps[corpid].get('iconID'),
@@ -34,10 +34,10 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                             publicShares=npccorps[corpid].get('publicShares'),
                             size=npccorps[corpid].get('size'),
                             solarSystemID=npccorps[corpid].get('solarSystemID'),
-                            extent=npccorps[corpid].get('extent'),
-                              ) 
-#            connection.execute(invNames.insert(),
+                            extent=npccorps[corpid].get('extent')
+            ))
+#            connection.execute(invNames.insert().values(
 #                           itemID=corpid,
 #                           itemName=npccorps[corpid].get('nameID',{}).get(language,''),
-#                          )
+#                          ))
     trans.commit()

@@ -22,10 +22,10 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for dogmaAttributeCategoryID in dogmaAttributeCategories:
             attribute = dogmaAttributeCategories[dogmaAttributeCategoryID]
-            connection.execute(dgmAttributeCategories.insert(),
+            connection.execute(dgmAttributeCategories.insert().values(
                 categoryID=dogmaAttributeCategoryID,
                 categoryName=attribute['name'],
                 categoryDescription=attribute.get('description', attribute['name'])
-            )
+            ))
     trans.commit()
 

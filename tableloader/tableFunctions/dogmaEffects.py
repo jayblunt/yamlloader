@@ -25,7 +25,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for dogmaEffectsid in dogmaEffects:
             effect=dogmaEffects[dogmaEffectsid]
-            connection.execute(dgmEffects.insert(),
+            connection.execute(dgmEffects.insert().values(
                                 effectID=dogmaEffectsid,
                                 effectName=effect.get('effectName'),
                                 effectCategory=effectcategory.get(effect['effectCategory']),
@@ -52,6 +52,5 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                                 npcActivationChanceAttributeID=effect.get('npcActivationChanceAttributeID'),
                                 fittingUsageChanceAttributeID=effect.get('fittingUsageChanceAttributeID'),
                                 modifierInfo=dump(effect.get('modifierInfo'))
-                                
-            )
+            ))
     trans.commit()

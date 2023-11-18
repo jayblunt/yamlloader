@@ -9,7 +9,7 @@ import os
 import sys
 from sqlalchemy import Table
 
-def importyaml(connection,metadata,sourcePath,language='en'):
+def importyaml(connection, metadata, sourcePath,language='en'):
     invTypes = Table('invTypes',metadata)
     trnTranslations = Table('trnTranslations',metadata)
     certMasteries = Table('certMasteries',metadata)
@@ -22,7 +22,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         typeids=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for typeid in typeids:
-            connection.execute(invTypes.insert(),
+            connection.execute(invTypes.insert().values(
                             typeID=typeid,
                             groupID=typeids[typeid].get('groupID',0),
                             typeName=typeids[typeid].get('name',{}).get(language,''),
@@ -38,56 +38,56 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                             marketGroupID=typeids[typeid].get('marketGroupID'),
                             graphicID=typeids[typeid].get('graphicID',0),
                             iconID=typeids[typeid].get('iconID'),
-                            soundID=typeids[typeid].get('soundID'))
+                            soundID=typeids[typeid].get('soundID')))
             if 'masteries' in typeids[typeid]:
                 for level in typeids[typeid]["masteries"]:
                     for cert in typeids[typeid]["masteries"][level]:
-                        connection.execute(certMasteries.insert(),
+                        connection.execute(certMasteries.insert().values(
                                             typeID=typeid,
                                             masteryLevel=level,
-                                            certID=cert)
+                                            certID=cert))
             if 'name' in typeids[typeid]:
                 for lang in typeids[typeid]['name']:
-                    connection.execute(trnTranslations.insert(),tcID=8,keyID=typeid,languageID=lang,text=typeids[typeid]['name'][lang])
+                    connection.execute(trnTranslations.insert().values(tcID=8,keyID=typeid,languageID=lang,text=typeids[typeid]['name'][lang]))
             if 'description' in typeids[typeid]:
                 for lang in typeids[typeid]['description']:
-                    connection.execute(trnTranslations.insert(),tcID=33,keyID=typeid,languageID=lang,text=typeids[typeid]['description'][lang])
+                    connection.execute(trnTranslations.insert().values(tcID=33,keyID=typeid,languageID=lang,text=typeids[typeid]['description'][lang]))
             if 'traits' in typeids[typeid]:
                 if 'types' in typeids[typeid]['traits']:
                     for skill in typeids[typeid]['traits']['types']:
                         for trait in typeids[typeid]['traits']['types'][skill]:
-                            result=connection.execute(invTraits.insert(),
+                            result=connection.execute(invTraits.insert().values(
                                                 typeID=typeid,
                                                 skillID=skill,
                                                 bonus=trait.get('bonus'),
                                                 bonusText=trait.get('bonusText',{}).get(language,''),
-                                                unitID=trait.get('unitID'))
+                                                unitID=trait.get('unitID')))
                             traitid=result.inserted_primary_key
                             for languageid in trait.get('bonusText',{}):
-                                connection.execute(trnTranslations.insert(),tcID=1002,keyID=traitid[0],languageID=languageid,text=trait['bonusText'][languageid])
+                                connection.execute(trnTranslations.insert().values(tcID=1002,keyID=traitid[0],languageID=languageid,text=trait['bonusText'][languageid]))
                 if 'roleBonuses' in typeids[typeid]['traits']:
                     for trait in typeids[typeid]['traits']['roleBonuses']:
-                        result=connection.execute(invTraits.insert(),
+                        result=connection.execute(invTraits.insert().values(
                                 typeID=typeid,
                                 skillID=-1,
                                 bonus=trait.get('bonus'),
                                 bonusText=trait.get('bonusText',{}).get(language,''),
-                                unitID=trait.get('unitID'))
+                                unitID=trait.get('unitID')))
                         traitid=result.inserted_primary_key
                         for languageid in trait.get('bonusText',{}):
-                            connection.execute(trnTranslations.insert(),tcID=1002,keyID=traitid[0],languageID=languageid,text=trait['bonusText'][languageid])
+                            connection.execute(trnTranslations.insert().values(tcID=1002,keyID=traitid[0],languageID=languageid,text=trait['bonusText'][languageid]))
                 if 'miscBonuses' in typeids[typeid]['traits']:
                     for trait in typeids[typeid]['traits']['miscBonuses']:
-                        result=connection.execute(invTraits.insert(),
+                        result=connection.execute(invTraits.insert().values(
                                 typeID=typeid,
                                 skillID=-2,
                                 bonus=trait.get('bonus'),
                                 bonusText=trait.get('bonusText',{}).get(language,''),
-                                unitID=trait.get('unitID'))
+                                unitID=trait.get('unitID')))
                         traitid=result.inserted_primary_key
                         for languageid in trait.get('bonusText',{}):
-                            connection.execute(trnTranslations.insert(),tcID=1002,keyID=traitid[0],languageID=languageid,text=trait['bonusText'][languageid])
+                            connection.execute(trnTranslations.insert().values(tcID=1002,keyID=traitid[0],languageID=languageid,text=trait['bonusText'][languageid]))
             if 'metaGroupID' in typeids[typeid] or 'variationParentTypeID' in typeids[typeid]:
-                connection.execute(invMetaTypes.insert(),typeID=typeid,metaGroupID=typeids[typeid].get('metaGroupID'),parentTypeID=typeids[typeid].get('variationParentTypeID'))
+                connection.execute(invMetaTypes.insert().values(typeID=typeid,metaGroupID=typeids[typeid].get('metaGroupID'),parentTypeID=typeids[typeid].get('variationParentTypeID')))
     trans.commit()
 

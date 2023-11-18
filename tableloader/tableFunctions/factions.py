@@ -20,7 +20,7 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         characterfactions=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for factionid in characterfactions:
-            connection.execute(chrFactions.insert(),
+            connection.execute(chrFactions.insert().values(
                             factionID=factionid,
                             factionName=characterfactions[factionid].get('nameID',{}).get(language,'en'),
                             description=characterfactions[factionid].get('descriptionID',{}).get(language,'en'),
@@ -30,5 +30,5 @@ def importyaml(connection,metadata,sourcePath,language='en'):
                             corporationID=characterfactions[factionid].get('corporationID'),
                             sizeFactor=characterfactions[factionid].get('sizeFactor'),
                             militiaCorporationID=characterfactions[factionid].get('militiaCorporationID'),
-                              ) 
+            ))
     trans.commit()

@@ -21,16 +21,16 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         categoryids=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for categoryid in categoryids:
-            connection.execute(invCategories.insert(),
+            connection.execute(invCategories.insert().values(
                             categoryID=categoryid,
                             categoryName=categoryids[categoryid].get('name',{}).get(language,''),
                             iconID=categoryids[categoryid].get('iconID'),
-                            published=categoryids[categoryid].get('published',0))
+                            published=categoryids[categoryid].get('published',0)))
             
             if 'name' in categoryids[categoryid]:
                 for lang in categoryids[categoryid]['name']:
                     try:
-                        connection.execute(trnTranslations.insert(),tcID=6,keyID=categoryid,languageID=lang,text=categoryids[categoryid]['name'][lang])
+                        connection.execute(trnTranslations.insert().values(tcID=6,keyID=categoryid,languageID=lang,text=categoryids[categoryid]['name'][lang]))
                     except:                        
                         print(f'{categoryid} {lang} has a category problem')
     trans.commit()

@@ -24,23 +24,23 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         schematics=load(yamlstream,Loader=SafeLoader)
         print("Yaml Processed into memory")
         for schematicid in schematics:
-            connection.execute(planetSchematics.insert(),
+            connection.execute(planetSchematics.insert().values(
                             schematicID=schematicid,
                             schematicName=schematics[schematicid].get('nameID',{}).get(language,''),
                             cycleTime=schematics[schematicid].get('cycleTime'),
-            )
+            ))
             for pin in schematics[schematicid].get('pins',{}):
-                connection.execute(planetSchematicsPinMap.insert(),
+                connection.execute(planetSchematicsPinMap.insert().values(
                                 schematicID=schematicid,
                                 pinTypeID=pin,
-                )
+                ))
 
             for typeid in schematics[schematicid].get('types',{}):
-                connection.execute(planetSchematicsTypeMap.insert(),
+                connection.execute(planetSchematicsTypeMap.insert().values(
                                 schematicID=schematicid,
                                 typeID=typeid,
                                 quantity=schematics[schematicid]['types'][typeid].get('quantity',0),
-                                isInput=schematics[schematicid]['types'][typeid].get('isInput',False),
-                )
+                                isInput=schematics[schematicid]['types'][typeid].get('isInput',False)
+                ))
 
     trans.commit()

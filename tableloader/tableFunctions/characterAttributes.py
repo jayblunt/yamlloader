@@ -21,12 +21,12 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         characterattributes=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for attributeid in characterattributes:
-            connection.execute(chrAttributes.insert(),
+            connection.execute(chrAttributes.insert().values(
                             attributeID=attributeid,
                             attributeName=characterattributes[attributeid].get('nameID',{}).get(language,''),
                             description=characterattributes[attributeid].get('description',''),
                             iconID=characterattributes[attributeid].get('iconID',None),
                             notes=characterattributes[attributeid].get('notes',''),
                             shortDescription=characterattributes[attributeid].get('shortDescription',''),
-                              ) 
+                              ))
     trans.commit()

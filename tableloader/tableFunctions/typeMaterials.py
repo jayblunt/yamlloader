@@ -21,9 +21,9 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for typeid in materials:
             for material in materials[typeid]['materials']:
-                connection.execute(invTypeMaterials.insert(),
+                connection.execute(invTypeMaterials.insert().values(
                             typeID=typeid,
                             materialTypeID=material.get('materialTypeID'),
                             quantity=material.get('quantity', 0)
-                )
+                ))
     trans.commit()

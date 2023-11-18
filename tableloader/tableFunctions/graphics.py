@@ -18,11 +18,11 @@ def importyaml(connection,metadata,sourcePath):
         graphics=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for graphic in graphics:
-            connection.execute(eveGraphics.insert(),
+            connection.execute(eveGraphics.insert().values(
                             graphicID=graphic,
                             sofFactionName=graphics[graphic].get('sofFactionName',''),
                             graphicFile=graphics[graphic].get('graphicFile',''),
                             sofHullName=graphics[graphic].get('sofHullName',''),
                             sofRaceName=graphics[graphic].get('sofRaceName',''),
-                            description=graphics[graphic].get('description',''))
+                            description=graphics[graphic].get('description','')))
     trans.commit()

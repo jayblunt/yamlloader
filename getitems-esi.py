@@ -1,13 +1,13 @@
-import os
 import configparser
+import os
+import sys
+from concurrent.futures import as_completed
+
 import requests
 import sqlalchemy as sa
 from requests_cache import CachedSession
 from requests_futures.sessions import FuturesSession
-from concurrent.futures import as_completed
-
 from tqdm import tqdm
-import sys
 
 
 def getitems(typelist):
@@ -26,7 +26,7 @@ def getitems(typelist):
             item = itemjson.get('type_id')
             if int(item) in sdetypelist:
                 try:
-                    connection.execute(invTypes.update().where(invTypes.c.typeID == sa.literal_column(str(item))),
+                    connection.execute(invTypes.update().where(invTypes.c.typeID == sa.literal_column(str(item))).values(
                                        typeID=item,
                                        typeName=itemjson['name'],
                                        groupID=itemjson.get('group_id', None),
@@ -36,11 +36,11 @@ def getitems(typelist):
                                        portionSize=itemjson.get('portion_size', None),
                                        volume=itemjson.get('volume', None),
                                        packagedVolume=itemjson.get('packaged_volume', None)
-                                       )
+                                       ))
                 except:
                     pass
             else:
-                connection.execute(invTypes.insert(),
+                connection.execute(invTypes.insert().values(
                                    typeID=item,
                                    typeName=itemjson['name'],
                                    marketGroupID=itemjson.get('market_group_id', None),
@@ -51,7 +51,7 @@ def getitems(typelist):
                                    capacity=itemjson.get('capacity', None),
                                    portionSize=itemjson.get('portion_size', None),
                                    mass=itemjson.get('mass', None)
-                                   )
+                                   ))
         else:
             badlist.append(typedata.result().url)
             print(typedata.result().url)

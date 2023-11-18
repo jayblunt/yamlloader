@@ -24,15 +24,15 @@ def getcorps(corplist):
         if corpdata.result().status_code == 200:
             corpid = int(str(corpdata.result().url).split('/')[5])
             corpjson = corpdata.result().json()
-            connection.execute(invNames.insert(),
+            connection.execute(invNames.insert().values(
                                itemID=corpid,
                                itemName=corpjson.get('name', None)
-                               )
+                               ))
 
-            connection.execute(crpNPCCorporations.insert(),
+            connection.execute(crpNPCCorporations.insert().values(
                                corporationID=corpid,
                                description=corpjson.get('description', None),
-                               )
+                               ))
         else:
             badlist.append(corpdata.result().url)
             print(corpdata.result().url)

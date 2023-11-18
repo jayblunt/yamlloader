@@ -18,8 +18,8 @@ def importyaml(connection,metadata,sourcePath):
         icons=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for icon in icons:
-            connection.execute(eveIcons.insert(),
+            connection.execute(eveIcons.insert().values(
                             iconID=icon,
                             iconFile=icons[icon].get('iconFile',''),
-                            description=icons[icon].get('description',''))
+                            description=icons[icon].get('description','')))
     trans.commit()

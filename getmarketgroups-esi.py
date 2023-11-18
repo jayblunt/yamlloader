@@ -30,23 +30,23 @@ def getgroups(grouplist):
                 hastypes = False
             if int(item) in sdegrouplist:
                 try:
-                    connection.execute(invMarketGroups.update().where(invMarketGroups.c.marketGroupID == sa.literal_column(str(item))),
+                    connection.execute(invMarketGroups.update().where(invMarketGroups.c.marketGroupID == sa.literal_column(str(item))).values(
                                        marketGroupID=item,
                                        parentGroupID=itemjson.get('parent_group_id'),
                                        marketGroupName=itemjson.get('name'),
                                        description=itemjson.get('description'),
                                        hasTypes=hastypes
-                                       )
+                                       ))
                 except:
                     pass
             else:
-                connection.execute(invMarketGroups.insert(),
+                connection.execute(invMarketGroups.insert().values(
                                    marketGroupID=item,
                                    parentGroupID=itemjson.get('parent_group_id'),
                                    marketGroupName=itemjson.get('name'),
                                    description=itemjson.get('description'),
                                    hasTypes=hastypes
-                                   )
+                                   ))
         else:
             badlist.append(groupdata.result().url)
             print(groupdata.result().url)

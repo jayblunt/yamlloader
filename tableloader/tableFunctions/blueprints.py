@@ -27,40 +27,40 @@ def importyaml(connection,metadata,sourcePath):
         blueprints=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for blueprint in blueprints:
-            connection.execute(industryBlueprints.insert(),typeID=blueprint,maxProductionLimit=blueprints[blueprint]["maxProductionLimit"])
+            connection.execute(industryBlueprints.insert().values(typeID=blueprint,maxProductionLimit=blueprints[blueprint]["maxProductionLimit"]))
             for activity in blueprints[blueprint]['activities']:
-                connection.execute(industryActivity.insert(),
+                connection.execute(industryActivity.insert().values(
                                     typeID=blueprint,
                                     activityID=activityIDs[activity],
-                                    time=blueprints[blueprint]['activities'][activity]['time'])
+                                    time=blueprints[blueprint]['activities'][activity]['time']))
                 if 'materials' in blueprints[blueprint]['activities'][activity]:
                     for material in blueprints[blueprint]['activities'][activity]['materials']:
-                        connection.execute(industryActivityMaterials.insert(),
+                        connection.execute(industryActivityMaterials.insert().values(
                                             typeID=blueprint,
                                             activityID=activityIDs[activity],
                                             materialTypeID=material['typeID'],
-                                            quantity=material['quantity'])
+                                            quantity=material['quantity']))
                 if 'products' in blueprints[blueprint]['activities'][activity]:
                     for product in blueprints[blueprint]['activities'][activity]['products']:
-                        connection.execute(industryActivityProducts.insert(),
+                        connection.execute(industryActivityProducts.insert().values(
                                             typeID=blueprint,
                                             activityID=activityIDs[activity],
                                             productTypeID=product['typeID'],
-                                            quantity=product['quantity'])
+                                            quantity=product['quantity']))
                         if 'probability' in product:
-                            connection.execute(industryActivityProbabilities.insert(),
+                            connection.execute(industryActivityProbabilities.insert().values(
                                                 typeID=blueprint,
                                                 activityID=activityIDs[activity],
                                                 productTypeID=product['typeID'],
-                                                probability=product['probability'])
+                                                probability=product['probability']))
                 try:
                     if 'skills' in blueprints[blueprint]['activities'][activity]:
                         for skill in blueprints[blueprint]['activities'][activity]['skills']:
-                            connection.execute(industryActivitySkills.insert(),
+                            connection.execute(industryActivitySkills.insert().values(
                                                 typeID=blueprint,
                                                 activityID=activityIDs[activity],
                                                 skillID=skill['typeID'],
-                                                level=skill['level'])
+                                                level=skill['level']))
                 except:
-                    print(f'{blueprint} has a bad skill')
+                    print(f'{blueprint} ({blueprints[blueprint]}) has a bad skill')
     trans.commit()

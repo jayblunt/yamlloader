@@ -26,15 +26,15 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for typeid in dogmaEffects:
             for effect in dogmaEffects[typeid]['dogmaEffects']:
-                connection.execute(dgmEffects.insert(),
+                connection.execute(dgmEffects.insert().values(
                                 typeID=typeid,
                                 effectID=effect['effectID'],
                                 isDefault=effect.get('isDefault')
-                )
+                ))
             for attribute in dogmaEffects[typeid]['dogmaAttributes']:
-                connection.execute(dgmAttributes.insert(),
+                connection.execute(dgmAttributes.insert().values(
                                 typeID=typeid,
                                 attributeID=attribute.get('attributeID'),
                                 valueFloat=attribute.get('value')
-                )
+                ))
     trans.commit()

@@ -22,18 +22,18 @@ def importyaml(connection,metadata,sourcePath):
         certificates=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for certificate in certificates:
-            connection.execute(certCerts.insert(),
+            connection.execute(certCerts.insert().values(
                             certID=certificate,
                             name=certificates[certificate].get('name',''),
                             description=certificates[certificate].get('description',''),
-                            groupID=certificates[certificate].get('groupID'))
+                            groupID=certificates[certificate].get('groupID')))
             for skill in certificates[certificate]['skillTypes']:
                 for skillLevel in certificates[certificate]['skillTypes'][skill]:
-                    connection.execute(certSkills.insert(),
+                    connection.execute(certSkills.insert().values(
                                         certID=certificate,
                                         skillID=skill,
                                         certLevelInt=skillmap[skillLevel],
                                         certLevelText=skillLevel,
                                         skillLevel=certificates[certificate]['skillTypes'][skill][skillLevel]
-                                        )
+                                        ))
     trans.commit()

@@ -21,23 +21,23 @@ def importyaml(connection,metadata,sourcePath,language='en'):
         metagroups=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for metagroupid in metagroups:
-            connection.execute(invMetaGroups.insert(),
+            connection.execute(invMetaGroups.insert().values(
                             metaGroupID=metagroupid,
                             metaGroupName=metagroups[metagroupid].get('nameID',{}).get(language,''),
                             iconID=metagroups[metagroupid].get('iconID'),
                             description=metagroups[metagroupid].get('descriptionID',{}).get(language,'')
-            )
+            ))
             
             if 'nameID' in metagroups[metagroupid]:
                 for lang in metagroups[metagroupid]['nameID']:
                     try:
-                        connection.execute(trnTranslations.insert(),tcID=34,keyID=metagroupid,languageID=lang,text=metagroups[metagroupid]['nameID'][lang])
+                        connection.execute(trnTranslations.insert().values(tcID=34,keyID=metagroupid,languageID=lang,text=metagroups[metagroupid]['nameID'][lang]))
                     except:                        
-                        print(f'{categoryid} {lang} has a category problem')
+                        print(f'{metagroupid} {lang} has a category problem')
             if 'descriptionID' in metagroups[metagroupid]:
                 for lang in metagroups[metagroupid]['descriptionID']:
                     try:
-                        connection.execute(trnTranslations.insert(),tcID=35,keyID=metagroupid,languageID=lang,text=metagroups[metagroupid]['descriptionID'][lang])
+                        connection.execute(trnTranslations.insert().values(tcID=35,keyID=metagroupid,languageID=lang,text=metagroups[metagroupid]['descriptionID'][lang]))
                     except:                        
-                        print(f'{categoryid} {lang} has a category problem')
+                        print(f'{metagroupid} {lang} has a category problem')
     trans.commit()

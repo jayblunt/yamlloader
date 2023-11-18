@@ -23,14 +23,14 @@ def importyaml(connection,metadata,sourcePath):
         skins=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for skinid in skins:
-            connection.execute(skins_table.insert(),
+            connection.execute(skins_table.insert().values(
                             skinID=skinid,
                             internalName=skins[skinid].get('internalName',''),
-                            skinMaterialID=skins[skinid].get('skinMaterialID',''))
+                            skinMaterialID=skins[skinid].get('skinMaterialID','')))
             for ship in skins[skinid]['types']:
-                connection.execute(skinShip.insert(),
+                connection.execute(skinShip.insert().values(
                                 skinID=skinid,
-                                typeID=ship)
+                                typeID=ship))
 
 
     print("opening Yaml2")
@@ -39,20 +39,20 @@ def importyaml(connection,metadata,sourcePath):
         skinlicenses=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for licenseid in skinlicenses:
-            connection.execute(skinLicense.insert(),
+            connection.execute(skinLicense.insert().values(
                                 licenseTypeID=licenseid,
                                 duration=skinlicenses[licenseid]['duration'],
-                                skinID=skinlicenses[licenseid]['skinID'])
+                                skinID=skinlicenses[licenseid]['skinID']))
     print("opening Yaml3")
     with open(os.path.join(sourcePath,'fsd','skinMaterials.yaml')) as yamlstream:
         print(f"importing {os.path.basename(yamlstream.name)}")
         skinmaterials=load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
         for materialid in skinmaterials:
-            connection.execute(skinMaterials.insert(),
+            connection.execute(skinMaterials.insert().values(
                                 skinMaterialID=materialid,
                                 displayNameID=skinmaterials[materialid]['displayNameID'],
                                 materialSetID=skinmaterials[materialid]['materialSetID']
-                                )
+                                ))
 
     trans.commit()

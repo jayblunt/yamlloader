@@ -35,12 +35,12 @@ def getgroups(grouplist):
                 except:
                     pass
             else:
-                connection.execute(invGroups.insert(),
+                connection.execute(invGroups.insert().values(
                                    groupID=item,
                                    groupName=itemjson['name'],
                                    categoryID=itemjson.get('category_id', None),
                                    published=itemjson.get('published', False),
-                                   )
+                                   ))
         else:
             badlist.append(groupdata.result().url)
             print(groupdata.result().url)

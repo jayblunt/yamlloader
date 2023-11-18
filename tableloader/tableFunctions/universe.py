@@ -1,14 +1,19 @@
 import sys
-from yaml import load, dump
+
+from yaml import dump, load
+
 try:
 	from yaml import CSafeLoader as SafeLoader
 except ImportError:
 	from yaml import SafeLoader
 	print("Using Python SafeLoader")
 
-import os
-from sqlalchemy import Table,select
+import contextlib
 import glob
+import os
+
+import sqlalchemy as sa
+from sqlalchemy import Table, select
 
 typeidcache={}
 
@@ -20,8 +25,9 @@ def grouplookup(connection,metadata,typeid):
     invTypes =  Table('invTypes', metadata)
     try:
         groupid=connection.execute(
-                invTypes.select().where( invTypes.c.typeID == typeid )
-            ).fetchall()[0]['groupID']
+                sa.select(invTypes.c.groupID)
+                .where( invTypes.c.typeID == typeid )
+            ).scalar()
     except:
         print(f"Group lookup failed on typeid {typeid}")
         groupid=-1
@@ -80,14 +86,14 @@ def importyaml(connection,metadata,sourcePath):
         trans = connection.begin()
         with open(regionfile) as yamlstream:
             region=load(yamlstream,Loader=SafeLoader)
-        try:
+        regionname=f"Region #{region['regionID']}"
+        with contextlib.suppress(Exception):
             regionname=connection.execute(
-                invNames.select().where( invNames.c.itemID == region['regionID'] )
-            ).fetchall()[0]['itemName']
-        except:
-            regionname="No Name"
+                sa.select(invNames.c.itemName)
+                .where( invNames.c.itemID == region['regionID'] )
+            ).scalar()
         print(f"Region {regionname}")
-        connection.execute(mapRegions.insert(),
+        connection.execute(mapRegions.insert().values(
                             regionID=region['regionID'],
                             regionName=regionname,
                             x=region['center'][0],
@@ -100,24 +106,24 @@ def importyaml(connection,metadata,sourcePath):
                             yMin=region['min'][1],
                             zMin=region['min'][2],
                             nebula=region.get('nebula'),
-                            factionID=region.get('factionID'))
-        connection.execute(mapDenormalize.insert(),
+                            factionID=region.get('factionID')))
+        connection.execute(mapDenormalize.insert().values(
                             itemID=region['regionID'],
                             typeID=3,
                             groupID=3,
                             itemName=regionname,
                             x=region['center'][0],
                             y=region['center'][1],
-                            z=region['center'][2])
+                            z=region['center'][2]))
                                         
-        connection.execute(mapLocationScenes.insert(),
+        connection.execute(mapLocationScenes.insert().values(
                             locationID=region['regionID'],
-                            graphicID=region['nebula'])
+                            graphicID=region['nebula']))
                             
         if  region.get('wormholeClassID'):
-            connection.execute(mapLocationWormholeClasses.insert(),
+            connection.execute(mapLocationWormholeClasses.insert().values(
                                 locationID=region['regionID'],
-                                wormholeClassID=region['wormholeClassID'])
+                                wormholeClassID=region['wormholeClassID']))
                             
         print("Importing Constellations.")
         constellations=glob.glob(os.path.join(head,'*','constellation.staticdata'))
@@ -125,14 +131,14 @@ def importyaml(connection,metadata,sourcePath):
             chead, tail = os.path.split(constellationfile)
             with open(constellationfile) as yamlstream:
                 constellation=load(yamlstream,Loader=SafeLoader)
-            try:
+            constellationname=f"Constellation #{constellation['constellationID']}"
+            with contextlib.suppress(Exception):
                 constellationname=connection.execute(
-                    invNames.select().where( invNames.c.itemID == constellation['constellationID'] )
-                ).fetchall()[0]['itemName']
-            except:
-                constellationname="No Constellation name"
+                    sa.select(invNames.c.itemName)
+                    .where( invNames.c.itemID == constellation['constellationID'] )
+                ).scalar()
             print(f"Constellation {constellationname}")
-            connection.execute(mapConstellations.insert(),
+            connection.execute(mapConstellations.insert().values(
                                 regionID=region['regionID'],
                                 constellationID=constellation['constellationID'],
                                 constellationName=constellationname,
@@ -147,8 +153,8 @@ def importyaml(connection,metadata,sourcePath):
                                 zMin=constellation['min'][2],
                                 radius=constellation['radius'],
                                 factionID=constellation.get('factionID',region.get('factionID'))
-                                )
-            connection.execute(mapDenormalize.insert(),
+                                ))
+            connection.execute(mapDenormalize.insert().values(
                                 itemID=constellation['constellationID'],
                                 regionID=region['regionID'],
                                 typeID=4,
@@ -156,30 +162,31 @@ def importyaml(connection,metadata,sourcePath):
                                 itemName=constellationname,
                                 x=constellation['center'][0],
                                 y=constellation['center'][1],
-                                z=constellation['center'][2])
+                                z=constellation['center'][2]))
 
             if  constellation.get('wormholeClassID'):
-                connection.execute(mapLocationWormholeClasses.insert(),
+                connection.execute(mapLocationWormholeClasses.insert().values(
                                 locationID=constellation['constellationID'],
-                                wormholeClassID=constellation['wormholeClassID'])
+                                wormholeClassID=constellation['wormholeClassID']))
 
             systems=glob.glob(os.path.join(chead,'*','solarsystem.staticdata'))
             print("Importing Systems")
             for systemfile in systems:
                 with open(systemfile) as yamlstream:
                     system=load(yamlstream,Loader=SafeLoader)
-                try:
-                    systemname=connection.execute(
-                        invNames.select().where( invNames.c.itemID == system['solarSystemID'] )
-                    ).fetchall()[0]['itemName']
-                except:
-                    systemname="No System Name"
+                systemname=f"System #{system['solarSystemID']}"
+                with contextlib.suppress(Exception):
+                    systemname = connection.execute(
+                        sa.select(invNames.c.itemName)
+                        .where(invNames.c.itemID == system['solarSystemID'])
+                    ).scalar()
                 print(f"System {systemname}")
                 if 'star' in system:
-                    starname=connection.execute(
-                        invNames.select().where( invNames.c.itemID == system['star']['id'] )
-                    ).fetchall()[0]['itemName']
-                    connection.execute(mapDenormalize.insert(),
+                    starname = connection.execute(
+                        sa.select(invNames.c.itemName)
+                        .where(invNames.c.itemID == system['star']['id'])
+                    ).scalar()
+                    connection.execute(mapDenormalize.insert().values(
                                     itemID=system['star']['id'],
                                     typeID=system['star']['typeID'],
                                     groupID=6,
@@ -191,9 +198,9 @@ def importyaml(connection,metadata,sourcePath):
                                     z=0,
                                     radius=system['star']['radius'],
                                     itemName=starname,
-                                    security=system['security'])
+                                    security=system['security']))
                 if system.get('secondarySun'):
-                    connection.execute(mapDenormalize.insert(),
+                    connection.execute(mapDenormalize.insert().values(
                                     itemID=system['secondarySun']['itemID'],
                                     typeID=system['secondarySun']['typeID'],
                                     groupID=995,
@@ -204,10 +211,10 @@ def importyaml(connection,metadata,sourcePath):
                                     y=system['secondarySun']['position'][1],
                                     z=system['secondarySun']['position'][2],
                                     itemName='Unknown Anomaly',
-                                    security=0)
+                                    security=0))
                                     
                                     
-                connection.execute(mapSolarSystems.insert(),
+                connection.execute(mapSolarSystems.insert().values(
                                     regionID=region['regionID'],
                                     constellationID=constellation['constellationID'],
                                     solarSystemID=system['solarSystemID'],
@@ -232,49 +239,49 @@ def importyaml(connection,metadata,sourcePath):
                                     factionID=system.get('factionID',constellation.get('factionID',region.get('factionID'))),
                                     radius=system['radius'],
                                     sunTypeID=system.get('sunTypeID',None),
-                                    securityClass=system.get('securityClass'))
+                                    securityClass=system.get('securityClass')))
                 if  system.get('wormholeClassID'):
-                    connection.execute(mapLocationWormholeClasses.insert(),
+                    connection.execute(mapLocationWormholeClasses.insert().values(
                                 locationID=system['solarSystemID'],
-                                wormholeClassID=system['wormholeClassID'])
+                                wormholeClassID=system['wormholeClassID']))
 
 
                 print("Importing Statistics")
                 if 'star' in system:
                     sstats=system['star'].get('statistics',{})
                     sstats['celestialID']=system['star']['id']
-                    connection.execute(mapCelestialStatistics.insert(),sstats)
+                    connection.execute(mapCelestialStatistics.insert().values(sstats))
                 for planet in system.get('planets'):
                     pstats=system['planets'][planet].get('statistics',{})
                     pstats['celestialID']=planet
-                    connection.execute(mapCelestialStatistics.insert(),pstats)
+                    connection.execute(mapCelestialStatistics.insert().values(pstats))
                     for belt in system['planets'][planet].get('asteroidBelts',[]):
                         bstats=system['planets'][planet]['asteroidBelts'][belt].get('statistics',{})
                         bstats['celestialID']=belt
-                        connection.execute(mapCelestialStatistics.insert(),bstats)
+                        connection.execute(mapCelestialStatistics.insert().values(bstats))
                     for moon in system['planets'][planet].get('moons',[]):
                         mstats=system['planets'][planet]['moons'][moon].get('statistics',{})
                         mstats['celestialID']=moon
-                        connection.execute(mapCelestialStatistics.insert(),mstats)
+                        connection.execute(mapCelestialStatistics.insert().values(mstats))
 
 
                 print("Importing Graphics details")
                 for planet in system.get('planets'):
                     pstats=system['planets'][planet].get('planetAttributes',{})
                     pstats['celestialID']=planet
-                    connection.execute(mapCelestialGraphics.insert(),pstats)
+                    connection.execute(mapCelestialGraphics.insert().values(pstats))
                     for moon in system['planets'][planet].get('moons',[]):
                         mstats=system['planets'][planet]['moons'][moon].get('planetAttributes',{})
                         mstats['celestialID']=moon
-                        connection.execute(mapCelestialGraphics.insert(),mstats)
+                        connection.execute(mapCelestialGraphics.insert().values(mstats))
 
 
                 print("Importing Stargates")
                 for stargate in system.get('stargates',[]):
                     jump={'stargateID':stargate,'destinationID':system['stargates'][stargate]['destination']}
-                    connection.execute(mapJumps.insert(),jump)
+                    connection.execute(mapJumps.insert().values(jump))
                 print("Importing to mapDenormalize")
-                connection.execute(mapDenormalize.insert(),
+                connection.execute(mapDenormalize.insert().values(
                                         itemID=system['solarSystemID'],
                                         typeID=5,
                                         groupID=5,
@@ -285,12 +292,13 @@ def importyaml(connection,metadata,sourcePath):
                                         z=system['center'][2],
                                         radius=system['radius'],
                                         itemName=systemname,
-                                        security=system['security'])
+                                        security=system['security']))
                 for planet in system.get('planets'):
-                    planetname=connection.execute(
-                        invNames.select().where( invNames.c.itemID == planet )
-                        ).fetchall()[0]['itemName']
-                    connection.execute(mapDenormalize.insert(),
+                    planetname = connection.execute(
+                        sa.select(invNames.c.itemName)
+                        .where(invNames.c.itemID == planet)
+                    ).scalar()
+                    connection.execute(mapDenormalize.insert().values(
                                         itemID=planet,
                                         typeID=system['planets'][planet]['typeID'],
                                         groupID=grouplookup(connection,metadata,system['planets'][planet]['typeID']),
@@ -304,14 +312,15 @@ def importyaml(connection,metadata,sourcePath):
                                         radius=system['planets'][planet]['radius'],
                                         itemName=planetname,
                                         security=system['security'],
-                                        celestialIndex=system['planets'][planet]['celestialIndex'])
+                                        celestialIndex=system['planets'][planet]['celestialIndex']))
                     x=0
                     for belt in get_sorted_objects(system['planets'][planet], 'asteroidBelts'):
                         x+=1
-                        beltname=connection.execute(
-                            invNames.select().where( invNames.c.itemID == belt )
-                            ).fetchall()[0]['itemName']
-                        connection.execute(mapDenormalize.insert(),
+                        beltname = connection.execute(
+                            sa.select(invNames.c.itemName)
+                            .where(invNames.c.itemID == belt)
+                            ).scalar()
+                        connection.execute(mapDenormalize.insert().values(
                                             itemID=belt,
                                             typeID=system['planets'][planet]['asteroidBelts'][belt]['typeID'],
                                             groupID=grouplookup(connection,metadata,system['planets'][planet]['asteroidBelts'][belt]['typeID']),
@@ -326,12 +335,13 @@ def importyaml(connection,metadata,sourcePath):
                                             itemName=beltname,
                                             security=system['security'],
                                             celestialIndex=system['planets'][planet]['celestialIndex'],
-                                            orbitIndex=x)
+                                            orbitIndex=x))
                     for npcstation in system['planets'][planet].get('npcStations',[]):
                             stationname=connection.execute(
-                                invNames.select().where( invNames.c.itemID == npcstation )
-                                ).fetchall()[0]['itemName']
-                            connection.execute(mapDenormalize.insert(),
+                                sa.select(invNames.c.itemName)
+                                .where( invNames.c.itemID == npcstation )
+                                ).scalar()
+                            connection.execute(mapDenormalize.insert().values(
                                                 itemID=npcstation,
                                                 typeID=system['planets'][planet]['npcStations'][npcstation]['typeID'],
                                                 groupID=grouplookup(connection,metadata,system['planets'][planet]['npcStations'][npcstation]['typeID']),
@@ -343,14 +353,15 @@ def importyaml(connection,metadata,sourcePath):
                                                 y=system['planets'][planet]['npcStations'][npcstation]['position'][1],
                                                 z=system['planets'][planet]['npcStations'][npcstation]['position'][2],
                                                 itemName=stationname,
-                                                security=system['security'])
+                                                security=system['security']))
                     x=0
                     for moon in get_sorted_objects(system['planets'][planet], 'moons'):
                         x+=1
                         moonname=connection.execute(
-                            invNames.select().where( invNames.c.itemID == moon )
-                            ).fetchall()[0]['itemName']
-                        connection.execute(mapDenormalize.insert(),
+                            sa.select(invNames.c.itemName)
+                            .where( invNames.c.itemID == moon )
+                            ).scalar()
+                        connection.execute(mapDenormalize.insert().values(
                                             itemID=moon,
                                             typeID=system['planets'][planet]['moons'][moon]['typeID'],
                                             groupID=grouplookup(connection,metadata,system['planets'][planet]['moons'][moon]['typeID']),
@@ -365,12 +376,13 @@ def importyaml(connection,metadata,sourcePath):
                                             itemName=moonname,
                                             security=system['security'],
                                             celestialIndex=system['planets'][planet]['celestialIndex'],
-                                            orbitIndex=x)
+                                            orbitIndex=x))
                         for npcstation in system['planets'][planet]['moons'][moon].get('npcStations',[]):
                             stationname=connection.execute(
-                                invNames.select().where( invNames.c.itemID == npcstation )
-                                ).fetchall()[0]['itemName']
-                            connection.execute(mapDenormalize.insert(),
+                                sa.select(invNames.c.itemName)
+                                .where( invNames.c.itemID == npcstation )
+                                ).scalar()
+                            connection.execute(mapDenormalize.insert().values(
                                                 itemID=npcstation,
                                                 typeID=system['planets'][planet]['moons'][moon]['npcStations'][npcstation]['typeID'],
                                                 groupID=grouplookup(connection,metadata,system['planets'][planet]['moons'][moon]['npcStations'][npcstation]['typeID']),
@@ -382,10 +394,10 @@ def importyaml(connection,metadata,sourcePath):
                                                 y=system['planets'][planet]['moons'][moon]['npcStations'][npcstation]['position'][1],
                                                 z=system['planets'][planet]['moons'][moon]['npcStations'][npcstation]['position'][2],
                                                 itemName=stationname,
-                                                security=system['security'])
+                                                security=system['security']))
                         
                 for stargate in system.get('stargates',[]):
-                    connection.execute(mapDenormalize.insert(),
+                    connection.execute(mapDenormalize.insert().values(
                                         itemID=stargate,
                                         typeID=system['stargates'][stargate]['typeID'],
                                         groupID=grouplookup(connection,metadata,system['stargates'][stargate]['typeID']),
@@ -395,7 +407,7 @@ def importyaml(connection,metadata,sourcePath):
                                         x=system['stargates'][stargate]['position'][0],
                                         y=system['stargates'][stargate]['position'][1],
                                         z=system['stargates'][stargate]['position'][2],
-                                        security=system['security'])
+                                        security=system['security']))
 
         trans.commit()
 
@@ -436,17 +448,16 @@ def buildJumps(connection,connectiontype):
     select distinct f.regionID,f.constellationID,t.constellationID,t.regionID
     from mapJumps join mapDenormalize f on mapJumps.stargateID=f.itemID join mapDenormalize t on mapJumps.destinationID=t.itemID where f.constellationID!=t.constellationID""")
 
-    if connectiontype == "sqlite" or connectiontype == "mysql" or connectiontype=="mssql":
+    if connectiontype in ["sqlite", "mysql", "mssql"]:
         connectiontype="other"
-    connection.execute(sql[connectiontype][0])
-    connection.execute(sql[connectiontype][1])
-    connection.execute(sql[connectiontype][2])
+    for sql_statment in sql[connectiontype]:
+        connection.execute(sa.text(sql_statment))
 
 
 def fixStationNames(connection,metadata):
     invNames =  Table('invNames', metadata)
     staStations = Table('staStations',metadata)
-    
-    connection.execute(staStations.update().values(stationName=select([invNames.c.itemName]).where(staStations.c.stationID==invNames.c.itemID).as_scalar()))
+
+    connection.execute(staStations.update().values(stationName=sa.select(invNames.c.itemName).where(staStations.c.stationID==invNames.c.itemID).as_scalar()))
 
 
