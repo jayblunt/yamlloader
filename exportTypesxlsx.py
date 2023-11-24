@@ -20,9 +20,9 @@ connection = engine.connect()
 metadata = sqlalchemy.MetaData()
 metadata.bind = engine
 
-invtypes = sqlalchemy.Table('invTypes', metadata, autoload=True)
+invtypes = sqlalchemy.Table('invTypes', metadata, autoload_with=engine)
 
-select = sqlalchemy.sql.select([invtypes])
+select = sqlalchemy.select(invtypes)
 
 result = connection.execute(select)
 
