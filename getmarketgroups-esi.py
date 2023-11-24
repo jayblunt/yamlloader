@@ -85,17 +85,7 @@ connection = engine.connect()
 trans = connection.begin()
 
 
-invMarketGroups = sa.Table('invMarketGroups', metadata,
-                           sa.Column('marketGroupID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-                           sa.Column('parentGroupID', sa.INTEGER()),
-                           sa.Column('marketGroupName', sa.VARCHAR(length=100)),
-                           sa.Column('description', sa.VARCHAR(length=3000)),
-                           sa.Column('iconID', sa.INTEGER()),
-                           sa.Column('hasTypes', sa.Boolean(name='invmarketgroups_hastypes')),
-                           schema=schema
-
-
-                           )
+invMarketGroups = sa.Table('invMarketGroups', metadata, autoload_with=engine, schema=schema)
 
 maingrouplist = []
 
@@ -109,7 +99,7 @@ errorcount = 0
 base_session = CachedSession("evesde", backend="redis")
 
 
-lookup = sa.select([invMarketGroups])
+lookup = sa.select(invMarketGroups)
 result = connection.execute(lookup).fetchall()
 
 sdegrouplist = []

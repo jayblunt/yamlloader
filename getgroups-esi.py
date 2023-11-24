@@ -81,18 +81,7 @@ connection = engine.connect()
 trans = connection.begin()
 
 
-invGroups = sa.Table('invGroups', metadata,
-                     sa.Column('groupID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-                     sa.Column('categoryID', sa.INTEGER(), index=True),
-                     sa.Column('groupName', sa.VARCHAR(length=100)),
-                     sa.Column('iconID', sa.INTEGER()),
-                     sa.Column('useBasePrice', sa.Boolean(name='invgroup_usebaseprice')),
-                     sa.Column('anchored', sa.Boolean(name='invgroup_anchored')),
-                     sa.Column('anchorable', sa.Boolean(name='invgroup_anchorable')),
-                     sa.Column('fittableNonSingleton', sa.Boolean(name='invgroup_fitnonsingle')),
-                     sa.Column('published', sa.Boolean(name='invgroup_published')),
-                     schema=schema
-                     )
+invGroups = sa.Table('invGroups', metadata, autoload_with=engine, schema=schema)
 
 
 maingrouplist = []
@@ -107,7 +96,7 @@ errorcount = 0
 base_session = CachedSession("evesde", backend="redis")
 
 
-lookup = sa.select([invGroups])
+lookup = sa.select(invGroups)
 result = connection.execute(lookup).fetchall()
 
 sdegrouplist = []

@@ -73,37 +73,7 @@ connection = engine.connect()
 trans = connection.begin()
 
 
-crpNPCCorporations = sa.Table('crpNPCCorporations', metadata,
-                              sa.Column('corporationID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-                              sa.Column('size', sa.CHAR(length=1)),
-                              sa.Column('extent', sa.CHAR(length=1)),
-                              sa.Column('solarSystemID', sa.INTEGER()),
-                              sa.Column('investorID1', sa.INTEGER()),
-                              sa.Column('investorShares1', sa.INTEGER()),
-                              sa.Column('investorID2', sa.INTEGER()),
-                              sa.Column('investorShares2', sa.INTEGER()),
-                              sa.Column('investorID3', sa.INTEGER()),
-                              sa.Column('investorShares3', sa.INTEGER()),
-                              sa.Column('investorID4', sa.INTEGER()),
-                              sa.Column('investorShares4', sa.INTEGER()),
-                              sa.Column('friendID', sa.INTEGER()),
-                              sa.Column('enemyID', sa.INTEGER()),
-                              sa.Column('publicShares', sa.INTEGER()),
-                              sa.Column('initialPrice', sa.INTEGER()),
-                              sa.Column('minSecurity', sa.FLOAT()),
-                              sa.Column('scattered', sa.Boolean(name='cnpcc_scatt')),
-                              sa.Column('fringe', sa.INTEGER()),
-                              sa.Column('corridor', sa.INTEGER()),
-                              sa.Column('hub', sa.INTEGER()),
-                              sa.Column('border', sa.INTEGER()),
-                              sa.Column('factionID', sa.INTEGER()),
-                              sa.Column('sizeFactor', sa.FLOAT()),
-                              sa.Column('stationCount', sa.INTEGER()),
-                              sa.Column('stationSystemCount', sa.INTEGER()),
-                              sa.Column('description', sa.VARCHAR(length=4000)),
-                              sa.Column('iconID', sa.INTEGER()),
-                              schema=schema
-                              )
+crpNPCCorporations = sa.Table('crpNPCCorporations', metadata, autoload_with=engine, schema=schema)
 
 invNames = sa.Table('invNames', metadata,
                     sa.Column('itemID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),

@@ -91,25 +91,7 @@ connection = engine.connect()
 trans = connection.begin()
 
 
-invTypes = sa.Table('invTypes', metadata,
-                    sa.Column('typeID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-                    sa.Column('groupID', sa.INTEGER(), index=True),
-                    sa.Column('typeName', sa.VARCHAR(length=100)),
-                    sa.Column('description', sa.UnicodeText()),
-                    sa.Column('mass', sa.FLOAT(precision=53)),
-                    sa.Column('volume', sa.FLOAT(precision=53)),
-                    sa.Column('packagedVolume', sa.FLOAT(precision=53)),
-                    sa.Column('capacity', sa.FLOAT(precision=53)),
-                    sa.Column('portionSize', sa.INTEGER()),
-                    sa.Column('raceID', sa.INTEGER()),
-                    sa.Column('basePrice', sa.DECIMAL(precision=19, scale=4)),
-                    sa.Column('published', sa.Boolean),
-                    sa.Column('marketGroupID', sa.INTEGER()),
-                    sa.Column('iconID', sa.INTEGER()),
-                    sa.Column('soundID', sa.INTEGER()),
-                    sa.Column('graphicID', sa.INTEGER()),
-                    schema=schema,
-                    )
+invTypes = sa.Table('invTypes', metadata, autoload_with=engine, schema=schema)
 
 
 maintypelist = []
@@ -124,7 +106,7 @@ errorcount = 0
 base_session = CachedSession("evesde", backend="redis")
 
 
-lookup = sa.select([invTypes])
+lookup = sa.select(invTypes)
 result = connection.execute(lookup).fetchall()
 
 sdetypelist = []
