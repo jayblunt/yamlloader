@@ -1,8 +1,11 @@
-import sys
 import os
-from sqlalchemy import Table
+import sys
+import typing
 
+import sqlalchemy.exc
+from sqlalchemy import Table
 from yaml import load
+
 try:
 	from yaml import CSafeLoader as SafeLoader
 except ImportError:
@@ -12,23 +15,23 @@ except ImportError:
 
 def importyaml(connection,metadata,sourcePath,language='en'):
     print("Importing Categories")
-    invCategories = Table('invCategories',metadata)
-    trnTranslations = Table('trnTranslations',metadata)
+    invCategories = Table('invCategories',metadata, autoload_with=connection)
+    trnTranslations = Table('trnTranslations',metadata, autoload_with=connection)
     
     trans = connection.begin()
     with open(os.path.join(sourcePath,'fsd','categoryIDs.yaml')) as yamlstream:
         print(f"importing {os.path.basename(yamlstream.name)}")
-        categoryids=load(yamlstream,Loader=SafeLoader)
+        categoryids: dict[int, dict] = load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
-        for categoryid in categoryids:
+        for categoryid, categorydata in categoryids.items():
             connection.execute(invCategories.insert().values(
                             categoryID=categoryid,
-                            categoryName=categoryids[categoryid].get('name',{}).get(language,''),
-                            iconID=categoryids[categoryid].get('iconID'),
-                            published=categoryids[categoryid].get('published',0)))
+                            categoryName=categorydata.get('name',{}).get(language,''),
+                            iconID=categorydata.get('iconID', 0),
+                            published=categorydata.get('published',0)))
             
-            if 'name' in categoryids[categoryid]:
-                for lang in categoryids[categoryid]['name']:
+            if 'name' in categorydata.keys():
+                for lang in categorydata['name']:
                     try:
                         connection.execute(trnTranslations.insert().values(tcID=6,keyID=categoryid,languageID=lang,text=categoryids[categoryid]['name'][lang]))
                     except:                        

@@ -28,11 +28,8 @@ result = connection.execute(select)
 
 wb = Workbook(write_only=True)
 ws = wb.create_sheet()
-first = True
+ws.append(list(result.keys()))
 for row in result:
-    if first:
-        ws.append(list(row.keys()))
-        first = False
     ws.append(list(row))
 
 wb.save('/tmp/invTypes.xlsx')

@@ -2,6 +2,7 @@ import sys
 import os
 import glob
 import sqlalchemy
+import sqlalchemy.exc
 #from sqlalchemy import Table
 
 from yaml import load
@@ -11,7 +12,7 @@ except ImportError:
 	from yaml import SafeLoader
 	print("Using Python SafeLoader")
 
-def importyaml(connection,metadata,sourcePath):
+def importyaml(connection: sqlalchemy.Connection, metadata: sqlalchemy.MetaData, sourcePath: os.PathLike):
 
     print("Importing BSD Tables")
 
@@ -25,7 +26,7 @@ def importyaml(connection,metadata,sourcePath):
             continue
 
         print(tablename)
-        tablevar = sqlalchemy.Table(tablename,metadata)
+        tablevar = sqlalchemy.Table(tablename, metadata, autoload_with=connection)
         print(f"Importing {file}")
         trans = connection.begin()
         with open(file) as yamlstream:

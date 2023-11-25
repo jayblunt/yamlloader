@@ -6,6 +6,8 @@ except ImportError:
 	print("Using Python SafeLoader")
 
 import os
+import typing
+import sqlalchemy
 from sqlalchemy import Table
 
 def importyaml(connection,metadata,sourcePath):
@@ -24,11 +26,12 @@ def importyaml(connection,metadata,sourcePath):
     trans = connection.begin()
     with open(os.path.join(sourcePath,'fsd','blueprints.yaml')) as yamlstream:
         print(f"importing {os.path.basename(yamlstream.name)}")
-        blueprints=load(yamlstream,Loader=SafeLoader)
+        blueprints: dict[int, dict] = load(yamlstream,Loader=SafeLoader)
         print(f"{os.path.basename(yamlstream.name)} loaded")
-        for blueprint in blueprints:
+        industryActivitySkills_seen: typing.Final = set()
+        for blueprint in blueprints.keys():
             connection.execute(industryBlueprints.insert().values(typeID=blueprint,maxProductionLimit=blueprints[blueprint]["maxProductionLimit"]))
-            for activity in blueprints[blueprint]['activities']:
+            for activity in blueprints[blueprint]['activities'].keys():
                 connection.execute(industryActivity.insert().values(
                                     typeID=blueprint,
                                     activityID=activityIDs[activity],
@@ -56,11 +59,14 @@ def importyaml(connection,metadata,sourcePath):
                 try:
                     if 'skills' in blueprints[blueprint]['activities'][activity]:
                         for skill in blueprints[blueprint]['activities'][activity]['skills']:
-                            connection.execute(industryActivitySkills.insert().values(
-                                                typeID=blueprint,
-                                                activityID=activityIDs[activity],
-                                                skillID=skill['typeID'],
-                                                level=skill['level']))
+                            blueprint_activity_type_key: typing.Final = f"{blueprint}-{activityIDs[activity]}-{skill['typeID']}-{skill['level']}"
+                            if not blueprint_activity_type_key in industryActivitySkills_seen:
+                                industryActivitySkills_seen.add(blueprint_activity_type_key)
+                                connection.execute(industryActivitySkills.insert().values(
+                                                    typeID=blueprint,
+                                                    activityID=activityIDs[activity],
+                                                    skillID=skill['typeID'],
+                                                    level=skill['level']))
                 except:
                     print(f'{blueprint} ({blueprints[blueprint]}) has a bad skill')
     trans.commit()

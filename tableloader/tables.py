@@ -350,10 +350,10 @@ def metadataCreator(schema):
                                      )
 
     industryActivitySkills = sa.Table('industryActivitySkills', metadata,
+                                      sa.Column('typeID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
                                       sa.Column('activityID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
                                       sa.Column('skillID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-                                      sa.Column('typeID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
-                                      sa.Column('level', sa.INTEGER()),
+                                      sa.Column('level', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
                                       schema=schema
                                       )
     # sa.Index('industryActivitySkills_idx1', industryActivitySkills.c.typeID, industryActivitySkills.c.activityID)
@@ -472,8 +472,9 @@ def metadataCreator(schema):
                             schema=schema
                             )
 
+    # autoincrement=True
     invTraits = sa.Table('invTraits', metadata,
-                         sa.Column('traitID', sa.INTEGER(), primary_key=True, autoincrement=False, nullable=False),
+                         sa.Column('traitID', sa.INTEGER(), primary_key=True, autoincrement=True, nullable=False),
                          sa.Column('typeID', sa.INTEGER()),
                          sa.Column('skillID', sa.INTEGER()),
                          sa.Column('bonus', sa.FLOAT()),
