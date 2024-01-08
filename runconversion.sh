@@ -102,15 +102,16 @@ if [ ! -d ${BASE_DIR}/env ]; then
 	python3 -m venv ${BASE_DIR}/env
 	. ${BASE_DIR}/env/bin/activate
 	pip install -U pip wheel setuptools
-	if [ -r ${SCRIPT_DIR}/requirements.txt ]; then
-		pip install -U --prefer-binary -r ${SCRIPT_DIR}/requirements.txt
-	fi
 	deactivate
 fi
 
 
 if [ -f ${BASE_DIR}/env/bin/activate ]; then
 	. ${BASE_DIR}/env/bin/activate
+fi
+
+if [ -r ${SCRIPT_DIR}/requirements.txt ]; then
+    pip install -U --prefer-binary -r ${SCRIPT_DIR}/requirements.txt
 fi
 
 
