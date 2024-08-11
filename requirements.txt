@@ -13,7 +13,7 @@ openpyxl==2.5.12
 psycopg2==2.7.6.1
 psycopg2-binary==2.7.6.1
 pymssql==2.1.4
-PyMySQL==0.9.3
+PyMySQL==1.1.1
 python-dateutil==2.8.1
 pytz==2020.1
 PyYAML==5.1
